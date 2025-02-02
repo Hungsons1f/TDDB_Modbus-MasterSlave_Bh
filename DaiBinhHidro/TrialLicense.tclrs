@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<TcLicenseInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2011/11/TcLicenseInfo">
+	<LicenseInfo>
+		<SystemId>{C0552275-876E-863E-BA1F-9911AB788E59}</SystemId>
+		<IssueTime>2022-11-30T17:45:00</IssueTime>
+		<ExpireTime>2022-12-08T00:00:00</ExpireTime>
+		<LicenseKey>fea0f2d743eb034e650678f8a901af01047cc60168871e34170ba92a768a6fbca5b95fcb79660766e0a399b6ed89532c8c8be9f57a2e332759f7e424eb5dc7a43627624d8b0287e45e31f7033a5f8a6d407fb3625b5f6fd36e655e8555481974fa1ae1971f9f3df51f3970b4bb5b30c9f28cae5088083d24fe797a3fc99b707a89a5c0598081afd371b4a516b8bf45137b8ac24a6c102e8d1fb593b5937cabba419b511d33f2c99a459160584ce4952e72d7d0eab97b2a5776b32761deb230d31ed404a6da5a7722b377182b80d6e1a3ecfe9ea28b4b7aae56deb8d2571d159a3b6b7d4776664c54748229d146afa63756e46d1bdf4dfc3a5704aaee9ac93da9</LicenseKey>
+		<License>
+			<LicenseId>{FDEB49FC-E8D5-4978-96BC-06E257B23F2D}</LicenseId>
+			<Name>TC3 Virtual-Serial-COM</Name>
+			<OrderNo>TF6360</OrderNo>
+		</License>
+		<License>
+			<LicenseId>{BCA6EE0A-9CE1-4D3F-98CA-413ABC0D94FD}</LicenseId>
+			<Name>TC3 Serial-Communication</Name>
+			<OrderNo>TF6340</OrderNo>
+		</License>
+		<License>
+			<LicenseId>{4C256767-E6E6-4AF5-BD68-9F7ABAD0C200}</LicenseId>
+			<Name>TC3 ADS</Name>
+			<OrderNo>TC1000</OrderNo>
+		</License>
+		<License>
+			<LicenseId>{66689887-CCBD-452C-AC9A-039D997C6E66}</LicenseId>
+			<Name>TC3 PLC</Name>
+			<OrderNo>TC1200</OrderNo>
+		</License>
+		<License>
+			<LicenseId>{A1AF8A04-C08D-4853-A5A0-0E6C3A278A8C}</LicenseId>
+			<Name>TC3 Modbus-RTU</Name>
+			<OrderNo>TF6255</OrderNo>
+		</License>
+		<License>
+			<LicenseId>{3FF18E97-7754-401B-93FB-70544DE28A13}</LicenseId>
+			<Name>TC3 IO</Name>
+			<OrderNo>TC1100</OrderNo>
+		</License>
+	</LicenseInfo>
+</TcLicenseInfo>

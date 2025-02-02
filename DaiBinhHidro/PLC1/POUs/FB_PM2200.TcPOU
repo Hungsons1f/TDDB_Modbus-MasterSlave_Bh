@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_PM2200" Id="{424297d8-0415-4cca-806d-7c8a11b0f60c}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_PM2200 EXTENDS FB_ModbusSlave
+VAR
+	arrAccPower	:	ARRAY [0..41] OF WORD;
+	arrQuaPower		:	ARRAY [0..17] OF WORD;
+	arrCommon		:	ARRAY [0..111] OF WORD;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="AccPower" Id="{511a922c-16b5-40eb-b342-f003d5c054a8}">
+      <Declaration><![CDATA[PROPERTY AccPower : ARRAY [0..41] OF WORD]]></Declaration>
+      <Get Name="Get" Id="{35dbaf46-f127-4597-b6d3-dce96a332af9}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[AccPower := arrAccPower;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Common" Id="{01ab0b79-be49-4632-92d6-b78b627ca829}">
+      <Declaration><![CDATA[PROPERTY Common : ARRAY [0..111] OF WORD]]></Declaration>
+      <Get Name="Get" Id="{16e0c163-60d1-404e-9068-65d270bfe7d7}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Common := arrCommon;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Convert" Id="{276333c7-3466-47b5-afde-518a7f2664a8}">
+      <Declaration><![CDATA[METHOD Convert : BOOL
+VAR_INPUT
+	iRegionNo	:	INT;
+	pReadData	:	POINTER TO BYTE;
+END_VAR
+VAR
+	pTempData	: 	POINTER TO BYTE;
+	iTempData	: 	BYTE;
+	iLoop		: 	INT;
+	bHiByte		:	BOOL := TRUE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE iRegionNo OF
+	0: 
+		FOR iLoop := 0 TO SIZEOF(arrAccPower)*2 DO
+			pTempData := (pReadData + iLoop);
+			iTempData := pTempData^;
+			
+			IF bHiByte THEN
+				arrAccPower[iLoop/2] := SHL(BYTE_TO_WORD(iTempData), 8);
+			ELSE 
+				arrAccPower[iLoop/2] := arrAccPower[iLoop/2] + BYTE_TO_WORD(iTempData);
+				IF bSwap THEN
+					arrAccPower[iLoop/2] := ROL(arrAccPower[iLoop/2], 8);
+				END_IF
+			END_IF
+			bHiByte := NOT bHiByte;
+		END_FOR
+		
+	1: 
+		FOR iLoop := 0 TO SIZEOF(arrQuaPower)*2 DO
+			pTempData := (pReadData + iLoop);
+			iTempData := pTempData^;
+			
+			IF bHiByte THEN
+				arrQuaPower[iLoop/2] := SHL(BYTE_TO_WORD(iTempData), 8);
+			ELSE 
+				arrQuaPower[iLoop/2] := arrQuaPower[iLoop/2] + BYTE_TO_WORD(iTempData);
+				IF bSwap THEN
+					arrQuaPower[iLoop/2] := ROL(arrQuaPower[iLoop/2], 8);
+				END_IF
+			END_IF
+			bHiByte := NOT bHiByte;
+		END_FOR
+
+	2: 
+		FOR iLoop := 0 TO SIZEOF(arrCommon)*2 DO
+			pTempData := (pReadData + iLoop);
+			iTempData := pTempData^;
+			
+			IF bHiByte THEN
+				arrCommon[iLoop/2] := SHL(BYTE_TO_WORD(iTempData), 8);
+			ELSE 
+				arrCommon[iLoop/2] := arrCommon[iLoop/2] + BYTE_TO_WORD(iTempData);
+				IF bSwap THEN
+					arrCommon[iLoop/2] := ROL(arrCommon[iLoop/2], 8);
+				END_IF
+			END_IF
+			bHiByte := NOT bHiByte;
+		END_FOR
+
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FirstCycle" Id="{e08c1b98-7f51-4715-953e-b416f51dff4f}">
+      <Declaration><![CDATA[METHOD FirstCycle : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[arrAddress[0][0] := 2999;			// Current
+arrAddress[0][1] := 12;
+
+arrAddress[1][0] := 3019;			// Voltage
+arrAddress[1][1] := 14;		
+		
+arrAddress[2][0] := 3053;
+arrAddress[2][1] := 16;				// Power
+arrAddress[3][0] := 3069;
+arrAddress[3][1] := 8;				
+
+arrAddress[4][0] := 3077;			// Power factor
+arrAddress[4][1] := 16;		
+		
+arrAddress[5][0] := 3109;			// Frequency
+arrAddress[6][1] := 2;				
+
+iNumAddRegion := 6;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="QuaPower" Id="{2a9e310c-a3ac-4af1-b587-dbdf2f800895}">
+      <Declaration><![CDATA[PROPERTY QuaPower : ARRAY [0..17] OF WORD]]></Declaration>
+      <Get Name="Get" Id="{a45de528-117b-4c7c-9bf5-dc69edceaf41}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[QuaPower := arrQuaPower;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <LineIds Name="FB_PM2200">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.AccPower.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.Common.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.Convert">
+      <LineId Id="13" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="25" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="35" Count="1" />
+      <LineId Id="49" Count="2" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="54" Count="30" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="16" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.FirstCycle">
+      <LineId Id="5" Count="1" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="7" Count="1" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="23" Count="2" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="26" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="13" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.QuaPower.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

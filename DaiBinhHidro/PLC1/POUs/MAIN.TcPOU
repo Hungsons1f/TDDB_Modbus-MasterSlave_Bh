@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="MAIN" Id="{033cb77c-f3de-492f-a9ea-e70326c75ef5}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	fbModbusMaster 	:		FB_ModbusMaster;
+	fbModbusSlave	:		FB_PM2200;
+	fbModbusTemp	: 		FB_TDS3000;
+	istep			:		UINT;
+	bStart			:		BOOL;
+	
+	arrData			:		ARRAY [0..255] OF BYTE;
+END_VAR
+
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE istep OF
+	0: //Trigger
+		IF bStart THEN
+			bStart := FALSE;
+			istep := 10;
+		END_IF
+		
+	10: //Init
+		fbModbusSlave.UnitID := 1;
+		fbModbusSlave.FirstCycle();
+		fbModbusTemp.UnitID := 2;
+		fbModbusTemp.FirstCycle();
+		
+		fbModbusMaster.FirstCycle();
+		fbModbusMaster.Init();
+		fbModbusMaster.RegisterSlave(fbModbusSlave);
+		fbModbusMaster.RegisterSlave(fbModbusTemp);
+		fbModbusMaster.Timeout := 1000;
+		istep := 20;
+		
+	20: //Running
+		IF fbModbusMaster.Run() THEN
+			istep := 30;
+		END_IF
+		
+	30: //Stopped
+		
+END_CASE
+
+fbModbusMaster();
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="2" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="14" Count="1" />
+      <LineId Id="17" Count="2" />
+      <LineId Id="39" Count="1" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="22" Count="2" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="30" Count="4" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="61" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

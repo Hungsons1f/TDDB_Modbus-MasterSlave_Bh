@@ -1,0 +1,565 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_ModbusMaster" Id="{383531aa-3652-4615-9883-854b84ebdc31}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ModbusMaster //IMPLEMENTS I_UniversalUnit
+VAR
+	sName			:		STRING;
+	bInitialized	:		BOOL;
+	iScantime		:		UINT;
+	iTimeout		:		UINT;
+	iErrorID		:		UDINT;
+	
+	bBusy			: 		BOOL;
+	bError			:		BOOL;
+	
+	iStepInit		:		INT;
+	iStepGeneral	: 		INT;
+	iStepRunning	:		INT;
+	bFirstCycle		:		BOOL;
+	
+	bRun			:		BOOL;
+	bStop			: 		BOOL;
+	
+	fbModbusMaster	: 		ModbusRtuMaster_PcCOM;
+	ipModbusSlave	:		ARRAY [1..247] OF I_ModbusSlave;
+	iAmountSlave	: 		UINT;
+	
+	iLoopSlave		:		UINT	:= 1;
+	iLoopAdr		:		UINT;
+	iQuantity 		: 		POINTER TO WORD;
+	iMBAddr 		: 		POINTER TO WORD;
+    arrData			: 		ARRAY [0..255] OF BYTE;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF bFirstCycle THEN
+	bFirstCycle := FALSE;
+END_IF
+		
+StateMachine();
+
+bRun := FALSE;
+bStop := FALSE;
+
+bInitialized := iStepGeneral >= 20;
+
+bError := fbModbusMaster.Error AND iStepGeneral = 30;
+iErrorID := fbModbusMaster.ErrorId;
+bBusy := fbModbusMaster.BUSY AND iStepGeneral = 30;
+
+//	// error	
+//		fbAxisError.Description := FUN_MergeStrings5(sMotorName, ' axis error number: ', UDINT_TO_STRING(iErrorID), '', '');
+//		fbAxisError.Set(bError);
+]]></ST>
+    </Implementation>
+    <Folder Name="Methods" Id="{067e956d-7447-440b-bb7c-a17eb17d60b1}" />
+    <Folder Name="Properties" Id="{dda8d42f-2796-433c-8b44-7c0e273aa52f}" />
+    <Folder Name="StateMachine" Id="{58b557b7-d2c2-457b-a8d0-dbac8b324ebc}" />
+    <Method Name="Abort" Id="{d170ce10-c663-4dfe-9dba-a085107ba388}" FolderPath="Methods\">
+      <Declaration><![CDATA[METHOD Abort : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="AnyError" Id="{45cb1e5b-801a-4c7d-a80e-9506285dfb3c}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY AnyError : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{360cff8f-569b-4317-8045-69ce24908b7f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[AnyError 	:= bError;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Busy" Id="{b11648ea-ec4e-40e9-adc4-f77827ee7f01}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Busy : BOOL]]></Declaration>
+      <Get Name="Get" Id="{a1c5374b-3865-4838-b65b-f5c6a0835665}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Busy := bBusy;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ErrorID" Id="{81dab0ad-62e0-4fd2-94f4-3786bdfc5c61}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY ErrorID : UDINT]]></Declaration>
+      <Get Name="Get" Id="{bd49841c-7579-429c-bb3e-55f6c8382d66}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ErrorID := iErrorID;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="FirstCycle" Id="{b81bd56c-9f95-4518-88ea-14ab1af8620f}" FolderPath="Methods\">
+      <Declaration><![CDATA[METHOD FirstCycle : BOOL
+VAR_INPUT
+//	ipAlarmController	: I_AlarmController;
+//	ipHMIController	: I_HMIController;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{adb0f840-9854-48bb-9867-8558f3fc8764}" FolderPath="Methods\">
+      <Declaration><![CDATA[METHOD Init : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF iStepGeneral = 0 THEN
+	iStepGeneral := 10;
+END_IF
+
+//Method output
+	Init := (iStepGeneral >= 20);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Initialized" Id="{2f2b00e9-f2c5-40fe-be3e-593bf36d21e2}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Initialized : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{7101007d-b47d-47a8-8511-547d82564dfb}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Initialized := bInitialized;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Name" Id="{f8832320-307e-488d-ba14-68e6271ef348}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Name : STRING
+]]></Declaration>
+      <Get Name="Get" Id="{10c882c2-26e5-4d65-9bcc-3499aabfe3c5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Name := sName;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{015f49a9-8a42-4718-b2c7-58ce03a742aa}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[sName := Name;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="ReadData" Id="{75712a42-a84c-4947-ac2a-2d1b25b7b297}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY ReadData : ARRAY [0..255] OF BYTE]]></Declaration>
+      <Get Name="Get" Id="{95024ca2-66ad-4b16-920e-6d1ddd469ac1}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ReadData := arrData;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ReadDataSize" Id="{3cb8fabd-08bb-4c22-96b3-af7830849c39}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY ReadDataSize : uint]]></Declaration>
+      <Get Name="Get" Id="{a8dc376e-955f-46b6-9b33-957335fbc210}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ReadDataSize := INT_TO_UINT(SIZEOF(arrData));]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="RegisterSlave" Id="{991fe131-bc6d-4e7e-9414-d4034de09ad3}" FolderPath="Methods\">
+      <Declaration><![CDATA[METHOD RegisterSlave : BOOL
+VAR_INPUT
+	ModbusSlave		:		I_ModbusSlave;
+END_VAR
+VAR
+	iLoop	:	UINT;
+	bExists	:	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR iLoop := 1 TO iAmountSlave DO
+	IF ipModbusSlave[iLoop] = ModbusSlave THEN
+		bExists := TRUE;
+		iLoop := iAmountSlave;
+	END_IF
+END_FOR 
+IF NOT bExists THEN
+	iAmountSlave := iAmountSlave + 1;
+	ipModbusSlave[iAmountSlave] := ModbusSlave;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Reset" Id="{4190b5ad-ee32-41e6-86da-3cf60dfcd435}" FolderPath="Methods\">
+      <Declaration><![CDATA[METHOD Reset : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bError := FALSE;
+iErrorID := 0;
+bError := FALSE;
+iStepInit		:= 0;
+iStepGeneral	:= 0;
+iStepRunning	:= 0;
+
+iLoopSlave		:= 1;
+iLoopAdr		:= 0;
+
+fbModbusMaster.Execute := FALSE;
+
+Reset := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Run" Id="{07a8bc59-999b-4d59-9560-feef9f903a20}" FolderPath="Methods\">
+      <Declaration><![CDATA[METHOD Run : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF (iStepGeneral = 20) THEN
+	iStepGeneral := 30;
+END_IF
+
+bRun := TRUE;
+Run := (iStepGeneral >= 30) AND (iStepGeneral < 200);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="ScanTime" Id="{5b7878c4-4362-4d5b-99fa-9da47a4ca446}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY ScanTime : UINT]]></Declaration>
+      <Get Name="Get" Id="{541e4923-ad17-4562-a852-1c8367bee7da}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ScanTime := iScantime;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{87feb87e-b4e3-41e6-89af-09cc8001252c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[iScantime := ScanTime;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="StateInit" Id="{4e49a1af-97ef-4ae6-a0c3-b5234cc2497a}" FolderPath="StateMachine\">
+      <Declaration><![CDATA[METHOD StateInit : BOOL (*Unit is performing initialization*)
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bError THEN
+	iStepGeneral := 20;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="StateMachine" Id="{c5907cd4-9636-4b7b-9f9b-3b47835d586e}" FolderPath="StateMachine\">
+      <Declaration><![CDATA[METHOD StateMachine : BOOL (*State machine of unit*)
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//State machine						   
+	CASE iStepGeneral OF
+		0:  //Uninitialized
+			StateUninitialized();
+	
+		10: //Initializing
+			StateInit();
+	
+		20: //Ready
+			StateReady();
+		
+		30: //Running
+			StateRunning();
+						
+		200: //stop
+			StateStopping();
+			
+		210: //stop done
+			StateStoppingDone();
+	END_CASE
+	
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="StateReady" Id="{652bc040-6918-41f6-8573-0396ad5da8fa}" FolderPath="StateMachine\">
+      <Declaration><![CDATA[METHOD StateReady : BOOL (* Unit is initialized*)
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="StateRunning" Id="{97a85ca0-cdf0-4a98-99b6-286d42d839ec}" FolderPath="StateMachine\">
+      <Declaration><![CDATA[METHOD StateRunning : BOOL (* Unit is uninitialized*)
+VAR 
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE iStepRunning OF
+	0: // Trigger
+		IF iAmountSlave > 0 THEN
+			iStepRunning := 10;
+		ELSE
+			iStepRunning := 50;
+		END_IF
+		
+	10: // Set parameters
+		IF iLoopSlave <= iAmountSlave THEN
+			IF  iLoopAdr <= ipModbusSlave[iLoopSlave].NumAddRegion - 1 THEN
+				iQuantity := (ipModbusSlave[iLoopSlave].Address + (iLoopAdr*2+1)*SIZEOF(WORD));
+				iMBAddr := (ipModbusSlave[iLoopSlave].Address + (iLoopAdr*2)*SIZEOF(WORD));
+				
+				fbModbusMaster.UnitID 	:=		ipModbusSlave[iLoopSlave].UnitID;
+				fbModbusMaster.Quantity	:=		iQuantity^;
+				fbModbusMaster.MBAddr	:=		iMBAddr^;
+				fbModbusMaster.cbLength	:= 		SIZEOF(arrData);
+				fbModbusMaster.pMemoryAddr	:= 	ADR(arrData);
+				fbModbusMaster.Timeout	:= 		UINT_TO_TIME(iTimeout);
+				
+				iLoopAdr := iLoopAdr + 1;
+			ELSE
+				iLoopAdr := 0;
+				iLoopSlave := iLoopSlave + 1;
+			END_IF
+		ELSE
+			iLoopSlave := 1;
+		END_IF
+		iStepRunning := 20;
+		
+	20: // Send request
+		IF NOT fbModbusMaster.BUSY THEN
+			iStepRunning := 30;
+		END_IF
+	
+	30: // Wait ack request
+		IF fbModbusMaster.BUSY THEN
+			iStepRunning := 40;
+		END_IF
+		
+	40: // Wait respond
+		IF NOT fbModbusMaster.BUSY THEN
+			iStepRunning := 50;
+		END_IF
+		
+	50: // Convert raw data
+		ipModbusSlave[iLoopSlave].Convert(iLoopAdr, ADR(arrData));
+
+	60: // Return, done
+		iStepRunning := 0;
+		
+END_CASE
+
+IF (iStepRunning >= 20) AND (iStepRunning <= 40) THEN
+	fbModbusMaster.ReadRegs();
+END_IF
+fbModbusMaster.Execute := iStepRunning >= 20 AND iStepRunning <= 30;
+
+
+//bTest S= iStepRunning > 
+//tonTest(IN := 
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="StateStopping" Id="{a5bc9935-91a4-4fec-8e4d-82d2573de05f}" FolderPath="StateMachine\">
+      <Declaration><![CDATA[METHOD StateStopping : BOOL (* Unit is uninitialized*)
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[iStepGeneral	:= 0;
+iStepRunning	:= 210;
+
+iLoopSlave		:= 1;
+iLoopAdr		:= 0;
+
+fbModbusMaster.Execute := FALSE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="StateStoppingDone" Id="{d6ba127c-7dd9-4267-bb45-f2c5c72fb129}" FolderPath="StateMachine\">
+      <Declaration><![CDATA[METHOD StateStoppingDone : BOOL (* Unit is uninitialized*)
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bStop THEN
+	iStepGeneral := 20;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="StateUninitialized" Id="{02a14e5c-79b0-481c-be40-ba9ce91213fc}" FolderPath="StateMachine\">
+      <Declaration><![CDATA[METHOD StateUninitialized : BOOL (* Unit is uninitialized*)
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Stop" Id="{d08751b9-9c58-450d-8b27-62019e485f78}" FolderPath="Methods\">
+      <Declaration><![CDATA[METHOD Stop : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF iStepGeneral >= 30 AND iStepGeneral < 200 THEN
+	iStepGeneral := 200;
+END_IF
+bStop := TRUE;
+
+Stop := (iStepGeneral = 210);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Timeout" Id="{ad915020-ee1a-4de9-9ab5-c123d6eefbc6}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Timeout : UINT]]></Declaration>
+      <Get Name="Get" Id="{33cc4f60-c2e8-4a21-b4ee-4e39dcc2be36}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Timeout := iTimeout;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{b1706c38-23dd-439c-ad15-24cf2b70e594}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[iTimeout := Timeout;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <LineIds Name="FB_ModbusMaster">
+      <LineId Id="69" Count="10" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="86" Count="2" />
+      <LineId Id="37" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.Abort">
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.AnyError.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.Busy.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.ErrorID.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.FirstCycle">
+      <LineId Id="8" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.Init">
+      <LineId Id="5" Count="4" />
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.Initialized.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.Name.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.Name.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.ReadData.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.ReadDataSize.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.RegisterSlave">
+      <LineId Id="12" Count="9" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.Reset">
+      <LineId Id="5" Count="1" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="10" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="16" Count="2" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.Run">
+      <LineId Id="5" Count="4" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.ScanTime.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.ScanTime.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.StateInit">
+      <LineId Id="4" Count="2" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.StateMachine">
+      <LineId Id="5" Count="2" />
+      <LineId Id="9" Count="2" />
+      <LineId Id="13" Count="2" />
+      <LineId Id="17" Count="2" />
+      <LineId Id="21" Count="1" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="55" Count="2" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="64" Count="1" />
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.StateReady">
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.StateRunning">
+      <LineId Id="7" Count="0" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="85" Count="1" />
+      <LineId Id="13" Count="2" />
+      <LineId Id="51" Count="1" />
+      <LineId Id="67" Count="2" />
+      <LineId Id="56" Count="5" />
+      <LineId Id="79" Count="1" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="77" Count="1" />
+      <LineId Id="74" Count="1" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="23" Count="16" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="40" Count="7" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="6" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.StateStopping">
+      <LineId Id="7" Count="1" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="13" Count="2" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.StateStoppingDone">
+      <LineId Id="4" Count="0" />
+      <LineId Id="6" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.StateUninitialized">
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.Stop">
+      <LineId Id="6" Count="4" />
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.Timeout.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModbusMaster.Timeout.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

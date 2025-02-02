@@ -1,0 +1,238 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_TDS3000" Id="{e8fb70df-be29-4460-957f-9586549f42be}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_TDS3000 EXTENDS FB_ModbusSlave
+VAR
+	arrConditionData	:	ARRAY [0..63] OF WORD;
+	arrUp_LoLimit		:	ARRAY [0..63] OF WORD;
+	arrUpUp_UpLimit		:	ARRAY [0..63] OF WORD;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="ConditionData" Id="{f85b153e-777c-46bf-afd8-d7a098fe9e2d}">
+      <Declaration><![CDATA[PROPERTY ConditionData : ARRAY [0..63] OF WORD]]></Declaration>
+      <Get Name="Get" Id="{a26145bd-6d63-412a-ae13-c34a1165bf75}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ConditionData := arrConditionData;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Convert" Id="{b48e17b2-54ba-4775-8ece-9ac9c943983a}">
+      <Declaration><![CDATA[METHOD Convert : BOOL
+VAR_INPUT
+	iRegionNo	:	INT;
+	pReadData	:	POINTER TO BYTE;
+END_VAR
+VAR
+	pTempData	: 	POINTER TO BYTE;
+	iTempData	: 	BYTE;
+	iLoop		: 	INT;
+	bHiByte		:	BOOL := TRUE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE iRegionNo OF
+	0: 
+		FOR iLoop := 0 TO SIZEOF(arrAddress[0][1])*2 DO
+			pTempData := (pReadData + iLoop);
+			iTempData := pTempData^;
+			
+			IF bHiByte THEN
+				arrConditionData[iLoop/2] := SHL(BYTE_TO_WORD(iTempData), 8);
+			ELSE 
+				arrConditionData[iLoop/2] := arrConditionData[iLoop/2] + BYTE_TO_WORD(iTempData);
+				IF bSwap THEN
+					arrConditionData[iLoop/2] := ROL(arrConditionData[iLoop/2], 8);
+				END_IF
+			END_IF
+			bHiByte := NOT bHiByte;
+		END_FOR
+		
+	1:
+		FOR iLoop := 17 TO (SIZEOF(arrAddress[1][1])*2 + 17) DO
+			pTempData := (pReadData + iLoop);
+			iTempData := pTempData^;
+			
+			IF bHiByte THEN
+				arrConditionData[iLoop/2] := SHL(BYTE_TO_WORD(iTempData), 8);
+			ELSE 
+				arrConditionData[iLoop/2] := arrConditionData[iLoop/2] + BYTE_TO_WORD(iTempData);
+				IF bSwap THEN
+					arrConditionData[iLoop/2] := ROL(arrConditionData[iLoop/2], 8);
+				END_IF
+			END_IF
+			bHiByte := NOT bHiByte;
+		END_FOR
+		
+	2: 
+		FOR iLoop := 0 TO SIZEOF(arrAddress[2][1])*2 DO
+			pTempData := (pReadData + iLoop);
+			iTempData := pTempData^;
+			
+			IF bHiByte THEN
+				arrUp_LoLimit[iLoop/2] := SHL(BYTE_TO_WORD(iTempData), 8);
+			ELSE 
+				arrUp_LoLimit[iLoop/2] := arrUp_LoLimit[iLoop/2] + BYTE_TO_WORD(iTempData);
+				IF bSwap THEN
+					arrUp_LoLimit[iLoop/2] := ROL(arrUp_LoLimit[iLoop/2], 8);
+				END_IF
+			END_IF
+			bHiByte := NOT bHiByte;
+		END_FOR
+		
+	3: 
+		FOR iLoop := 17 TO SIZEOF(arrAddress[3][1])*2 + 17 DO
+			pTempData := (pReadData + iLoop);
+			iTempData := pTempData^;
+			
+			IF bHiByte THEN
+				arrUp_LoLimit[iLoop/2] := SHL(BYTE_TO_WORD(iTempData), 8);
+			ELSE 
+				arrUp_LoLimit[iLoop/2] := arrUp_LoLimit[iLoop/2] + BYTE_TO_WORD(iTempData);
+				IF bSwap THEN
+					arrUp_LoLimit[iLoop/2] := ROL(arrUp_LoLimit[iLoop/2], 8);
+				END_IF
+			END_IF
+			bHiByte := NOT bHiByte;
+		END_FOR
+
+	4: 
+		FOR iLoop := 0 TO SIZEOF(arrAddress[4][1])*2 DO
+			pTempData := (pReadData + iLoop);
+			iTempData := pTempData^;
+			
+			IF bHiByte THEN
+				arrUpUp_UpLimit[iLoop/2] := SHL(BYTE_TO_WORD(iTempData), 8);
+			ELSE 
+				arrUpUp_UpLimit[iLoop/2] := arrUpUp_UpLimit[iLoop/2] + BYTE_TO_WORD(iTempData);
+				IF bSwap THEN
+					arrUpUp_UpLimit[iLoop/2] := ROL(arrUpUp_UpLimit[iLoop/2], 8);
+				END_IF
+			END_IF
+			bHiByte := NOT bHiByte;
+		END_FOR
+
+	5: 
+		FOR iLoop := 17 TO SIZEOF(arrAddress[5][1])*2 + 17 DO
+			pTempData := (pReadData + iLoop);
+			iTempData := pTempData^;
+			
+			IF bHiByte THEN
+				arrUpUp_UpLimit[iLoop/2] := SHL(BYTE_TO_WORD(iTempData), 8);
+			ELSE 
+				arrUpUp_UpLimit[iLoop/2] := arrUpUp_UpLimit[iLoop/2] + BYTE_TO_WORD(iTempData);
+				IF bSwap THEN
+					arrUpUp_UpLimit[iLoop/2] := ROL(arrUpUp_UpLimit[iLoop/2], 8);
+				END_IF
+			END_IF
+			bHiByte := NOT bHiByte;
+		END_FOR
+
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FirstCycle" Id="{70eeedf9-dc8a-4bd4-9ac7-1fc925a31989}">
+      <Declaration><![CDATA[METHOD FirstCycle : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[arrAddress[0][0] := 16#0000;
+arrAddress[0][1] := 17;
+arrAddress[1][0] := 16#0017;
+arrAddress[1][1] := 15;
+
+arrAddress[2][0] := 16#0100;
+arrAddress[2][1] := 17;
+arrAddress[3][0] := 16#0117;
+arrAddress[3][1] := 15;
+
+arrAddress[4][0] := 16#0200;
+arrAddress[4][1] := 17;
+arrAddress[5][0] := 16#0217;
+arrAddress[5][1] := 15;
+
+iNumAddRegion := 6;
+
+bSwap := TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Up_LoLimit" Id="{d5b8ab1e-d642-46de-8c6b-98e1a26d2cb6}">
+      <Declaration><![CDATA[PROPERTY Up_LoLimit : ARRAY [0..63] OF WORD]]></Declaration>
+      <Get Name="Get" Id="{e20bdbc2-bf8e-4486-913d-26f0a21b8c5f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Up_LoLimit := arrUp_LoLimit;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="UpUp_UpLimit" Id="{c107981f-2291-4349-8d24-74209dc61e7b}">
+      <Declaration><![CDATA[PROPERTY UpUp_UpLimit : ARRAY [0..63] OF WORD]]></Declaration>
+      <Get Name="Get" Id="{6abb6c8a-f004-493f-b539-3cad41bef48c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[UpUp_UpLimit := arrUpUp_UpLimit;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <LineIds Name="FB_TDS3000">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TDS3000.ConditionData.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TDS3000.Convert">
+      <LineId Id="13" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="25" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="35" Count="1" />
+      <LineId Id="49" Count="2" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="96" Count="1" />
+      <LineId Id="99" Count="13" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="54" Count="14" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="115" Count="14" />
+      <LineId Id="69" Count="15" />
+      <LineId Id="130" Count="15" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="16" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TDS3000.FirstCycle">
+      <LineId Id="17" Count="1" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="39" Count="2" />
+      <LineId Id="21" Count="1" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="23" Count="1" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="13" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TDS3000.Up_LoLimit.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TDS3000.UpUp_UpLimit.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

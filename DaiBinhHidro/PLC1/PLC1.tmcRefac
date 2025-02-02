@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Refactors>
+  <Renames>
+    <RenamedType>
+      <Type guid="424297d8-0415-4cca-806d-7c8a11b0f60c">FB_MODBUSDEVICEA</Type>
+      <From>FB_ModbusDeviceA</From>
+      <To>FB_PM2200</To>
+    </RenamedType>
+    <RenamedSymbol>
+      <Type guid="424297d8-0415-4cca-806d-7c8a11b0f60c">FB_PM2200</Type>
+      <From>arrConditionData</From>
+      <To>arrAccPower</To>
+    </RenamedSymbol>
+    <RenamedSymbol>
+      <Type guid="424297d8-0415-4cca-806d-7c8a11b0f60c">FB_PM2200</Type>
+      <From>arrUp_LoLimit</From>
+      <To>arrQuaPower</To>
+    </RenamedSymbol>
+    <RenamedSymbol>
+      <Type guid="424297d8-0415-4cca-806d-7c8a11b0f60c">FB_PM2200</Type>
+      <From>arrUpUp_UpLimit</From>
+      <To>arrCommon</To>
+    </RenamedSymbol>
+  </Renames>
+</Refactors>
